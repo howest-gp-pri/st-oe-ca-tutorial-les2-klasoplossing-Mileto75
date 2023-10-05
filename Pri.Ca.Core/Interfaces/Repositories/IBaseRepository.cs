@@ -14,5 +14,6 @@ namespace Pri.Ca.Core.Interfaces.Repositories
         Task<bool> AddAsync(T toAdd);
         Task<bool> UpdateAsync(T toUpdate);
         Task<bool> DeleteAsync(T toDelete);
+        IQueryable<T> GetAll();
     }
 }

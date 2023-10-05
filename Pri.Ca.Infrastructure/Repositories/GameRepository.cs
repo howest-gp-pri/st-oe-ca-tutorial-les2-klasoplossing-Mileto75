@@ -11,63 +11,38 @@ using System.Threading.Tasks;
 
 namespace Pri.Ca.Infrastructure.Repositories
 {
-    public class GameRepository : IGameRepository
+    public class GameRepository : Baserepository<Game>, IGameRepository
     {
-        private readonly ApplicationDbContext _applicationDbContext;
-        private readonly ILogger<GameRepository> _logger;
-
-        public GameRepository(ApplicationDbContext applicationDbContext, ILogger<GameRepository> logger)
+        public GameRepository(ApplicationDbContext applicationDbContext, ILogger<Baserepository<Game>> logger) : base(applicationDbContext, logger)
         {
-            _applicationDbContext = applicationDbContext;
-            _logger = logger;
         }
 
-        public async Task<bool> AddAsync(Game toAdd)
+        public override IQueryable<Game> GetAll()
         {
-            _applicationDbContext.Add(toAdd);
-            return await SaveChangesAsync();
+            return _table
+                .Include(g => g.Publisher)
+                .Include(g => g.Genres)
+                .AsQueryable();
         }
 
-        public async Task<bool> DeleteAsync(Game toDelete)
+        public override async Task<IEnumerable<Game>> GetAllAsync()
         {
-            _applicationDbContext.Remove(toDelete);
-            return await SaveChangesAsync();
+            return await _table
+                .Include(g => g.Publisher)
+                .Include(g => g.Genres).ToListAsync();
         }
 
-        public async Task<IEnumerable<Game>> GetAllAsync()
+        public override async Task<Game> GetByIdAsync(int id)
         {
-            return await _applicationDbContext
-                .Games.ToListAsync();
+            return await _table
+                .Include(g => g.Publisher)
+                .Include(g => g.Genres).FirstOrDefaultAsync(g => g.Id == id);
         }
 
-        public async Task<Game> GetByIdAsync(int id)
+        public async Task<IEnumerable<Game>> SearchByName(string name)
         {
-            return await _applicationDbContext
-                .Games
-                .Include(p => p.Publisher)
-                .Include(p => p.Genres)
-                .FirstOrDefaultAsync(g => g.Id == id);
-        }
-
-        public async Task<bool> UpdateAsync(Game toUpdate)
-        {
-            var game = await _applicationDbContext.Games
-                .FirstOrDefaultAsync(g => g.Id == toUpdate.Id);
-            game = toUpdate;
-            return await SaveChangesAsync();
-        }
-        private async Task<bool> SaveChangesAsync()
-        {
-            try
-            {
-                await _applicationDbContext.SaveChangesAsync();
-                return true;
-            }
-            catch (DbUpdateException dbUpdateException)
-            {
-                _logger.LogError(dbUpdateException.Message);
-                return false;
-            }
+            var games = GetAll();
+            return await games.Where(s => s.Title.ToUpper() == name.ToUpper()).ToListAsync();
         }
     }
 }
