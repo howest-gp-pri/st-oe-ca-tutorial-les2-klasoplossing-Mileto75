@@ -1,4 +1,5 @@
-﻿using Pri.Ca.Core.Services.Models;
+﻿using Pri.Ca.Core.Entities;
+using Pri.Ca.Core.Services.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +10,10 @@ namespace Pri.Ca.Core.Interfaces
 {
     public interface IGameService
     {
-        Task<GameResultModel> AddAsync(GameAddModel gameAddModel);
-        Task<GameResultModel> UpdateAsync(GameUpdateModel gameUpdateModel);
-        Task<GameResultModel> DeleteAsync(int id);
-        Task<GameResultModel> GetAllAsync();
-        Task<GameResultModel> GetByIdAsync(int id);
+        Task<ResultModel<Game>> AddAsync(GameAddModel gameAddModel);
+        Task<ResultModel<Game>> UpdateAsync(GameUpdateModel gameUpdateModel);
+        Task<ResultModel<Game>> DeleteAsync(int id);
+        Task<ResultModel<Game>> GetAllAsync();
+        Task<ResultModel<Game>> GetByIdAsync(int id);
     }
 }

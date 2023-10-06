@@ -13,17 +13,34 @@ namespace Pri.Ca.Core.Services
     public class GameService : IGameService
     {
         private readonly IGameRepository _gameRepository;
+        private readonly IGenreRepository _genreRepository;
+        private readonly IPublisherRepository _publisherRepository;
 
         public GameService(IGameRepository gameRepository)
         {
             _gameRepository = gameRepository;
         }
 
-        public async Task<GameResultModel> AddAsync(GameAddModel gameAddModel)
+        public async Task<ResultModel<Game>> AddAsync(GameAddModel gameAddModel)
         {
             //this is missing extra checks on
             //foreign key data Publisher and Genre
             //due to lack of repositories
+            var publisher = await _publisherRepository.GetByIdAsync(gameAddModel.PublisherId);
+            if(publisher == null)
+            {
+                return CreateErrorModel("Unkown publisher");
+            }
+            var genres =  _genreRepository.GetAll();
+            if(genres
+                .Where(g => gameAddModel.GenreIds.Contains(g.Id)).Count() != gameAddModel.GenreIds.Count())
+            {
+                return CreateErrorModel("Unknown genres");
+            }
+            if(_gameRepository.GetAll().Any(g => g.Title.ToUpper().Equals(gameAddModel.Title.ToUpper())))
+            {
+                return CreateErrorModel("Name exists");
+            }
             var game = new Game
             {
                 Title = gameAddModel.Title,
@@ -38,7 +55,7 @@ namespace Pri.Ca.Core.Services
             return CreateResultModel(null);
         }
 
-        public async Task<GameResultModel> DeleteAsync(int id)
+        public async Task<ResultModel<Game>> DeleteAsync(int id)
         {
             var game = await _gameRepository.GetByIdAsync(id);
             if(game == null)
@@ -52,13 +69,13 @@ namespace Pri.Ca.Core.Services
             return CreateResultModel(null);
         }
 
-        public async Task<GameResultModel> GetAllAsync()
+        public async Task<ResultModel<Game>> GetAllAsync()
         {
             var games = await _gameRepository.GetAllAsync();
             return CreateResultModel(games);
         }
 
-        public async Task<GameResultModel> GetByIdAsync(int id)
+        public async Task<ResultModel<Game>> GetByIdAsync(int id)
         {
             var game = await _gameRepository.GetByIdAsync(id);
             if(game == null)
@@ -68,7 +85,7 @@ namespace Pri.Ca.Core.Services
             return CreateResultModel(new List<Game> { game });
         }
 
-        public async Task<GameResultModel> UpdateAsync(GameUpdateModel gameUpdateModel)
+        public async Task<ResultModel<Game>> UpdateAsync(GameUpdateModel gameUpdateModel)
         {
             //this is missing extra checks on
             //foreign key data Publisher and Genre
@@ -88,20 +105,20 @@ namespace Pri.Ca.Core.Services
             }
             return CreateResultModel(null);
         }
-        private GameResultModel CreateErrorModel(string error)
+        private ResultModel<Game> CreateErrorModel(string error)
         {
-            return new GameResultModel
+            return new ResultModel<Game>
             {
                 IsSuccess = false,
                 Errors = new List<string> { error }
             };
         }
-        private GameResultModel CreateResultModel(IEnumerable<Game> games)
+        private ResultModel<Game> CreateResultModel(IEnumerable<Game> games)
         {
-            return new GameResultModel
+            return new ResultModel<Game>
             {
                 IsSuccess = true,
-                Games = games
+                Items = games
             };
         }
     }

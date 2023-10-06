@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Pri.Ca.Core.Entities;
 using Pri.Ca.Core.Interfaces;
 using Pri.Ca.Core.Interfaces.Repositories;
 using Pri.Ca.Infrastructure.Data;
 using Pri.Ca.Web.ViewModels;
+
 
 namespace Pri.Ca.Web.Controllers
 {
@@ -22,7 +24,7 @@ namespace Pri.Ca.Web.Controllers
             
             var gamesIndexViewModel = new GamesIndexViewModel
             {
-                Games = result.Games.Select(g => new BaseViewModel 
+                Games = result.Items.Select(g => new BaseViewModel 
                     {
                         Id = g.Id,
                         Value = g.Title
@@ -39,15 +41,15 @@ namespace Pri.Ca.Web.Controllers
             }
             var gamesInfoViewModel = new GamesInfoViewModel 
             {
-                Id = result.Games.First().Id,
-                Value = result.Games.First().Title,
-                Description = result.Games.First().Description,
+                Id = result.Items.First().Id,
+                Value = result.Items.First().Title,
+                Description = result.Items.First().Description,
                 Publisher = new BaseViewModel 
                 {
-                    Id = result.Games.First().Publisher.Id,
-                    Value = result.Games.First().Publisher.Name,
+                    Id = result.Items.First().Publisher.Id,
+                    Value = result.Items.First().Publisher.Name,
                 },
-                Genres = result.Games.First().Genres.Select(g => new BaseViewModel
+                Genres = result.Items.First().Genres.Select(g => new BaseViewModel
                 {
                     Id = g.Id,
                     Value = g.Name

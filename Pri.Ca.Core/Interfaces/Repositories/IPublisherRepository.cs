@@ -7,9 +7,7 @@ using System.Threading.Tasks;
 
 namespace Pri.Ca.Core.Interfaces.Repositories
 {
-    public interface IGenreRepository : IBaseRepository<Genre>
+    public interface IPublisherRepository : IBaseRepository<Publisher>
     {
-        //no need to define this repository interface if no
-        //extra methods needed
     }
 }
